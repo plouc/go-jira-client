@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"time"
+	"strconv"
 	"github.com/plouc/go-jira-client"
 	"io/ioutil"
 	"launchpad.net/goyaml"
@@ -78,6 +79,13 @@ func main() {
 			return
 		}
 
-		fmt.Printf("> %+v\n", user)
+		format := "> %-14s: %s\n"
+
+		fmt.Printf("%s\n", user.Name)
+		fmt.Printf(format, "self",          user.Self)
+		fmt.Printf(format, "email address", user.EmailAddress)
+		fmt.Printf(format, "display name",  user.DisplayName)
+		fmt.Printf(format, "active",        strconv.FormatBool(user.Active))
+		fmt.Printf(format, "time zone",     user.TimeZone)
 	}
 }
