@@ -1,0 +1,5 @@
+host:          http://jira.domain.com
+api_path:      /rest/api/2
+activity_path: /activity
+login:         LOGIN
+password:      PASSWORD

@@ -81,15 +81,6 @@ type IssueType struct {
 	Subtask     bool
 }
 
-type User struct {
-	Self         string            `json:"self"`
-	Name         string            `json:"name"`
-	EmailAddress string            `json:"emailAddress"`
-	DisplayName  string            `json:"displayName"`
-	Active       bool              `json:"active"`
-	AvatarUrls   map[string]string `json:"avatarUrls"`
-}
-
 type JiraProject struct {
 	Self       string
 	Id         string
@@ -170,7 +161,6 @@ func (j *Jira) buildAndExecRequest(method string, url string) []byte {
 	if err != nil {
 		fmt.Printf("%s", err)
 	}
-	//fmt.Println(string(contents))
 
 	return contents
 }
@@ -221,19 +211,6 @@ func (j *Jira) IssuesAssignedTo(user string, maxResults int, startAt int) IssueL
 	issues.Pagination = &pagination
 
 	return issues
-}
-
-func (j *Jira) User(username string) (*User, error) {
-	url := j.BaseUrl + j.ApiPath + "/user?username=" + username
-	contents := j.buildAndExecRequest("GET", url)
-
-	user := new(User)
-	err := json.Unmarshal(contents, &user)
-	if err != nil {
-		fmt.Println("%s", err)
-	}
-
-	return user, err
 }
 
 // search an issue by its id
