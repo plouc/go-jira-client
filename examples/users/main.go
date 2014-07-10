@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"time"
 	"strconv"
-	"github.com/plouc/go-jira-client"
+	//"github.com/plouc/go-jira-client"
+	"github.com/jmervine/go-jira-client"
 	"io/ioutil"
 	"launchpad.net/goyaml"
 )
