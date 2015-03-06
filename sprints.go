@@ -38,8 +38,6 @@ type SprintReport struct {
 	Sprint		Sprint			`json:"sprint"`
 }
 
-//allIssuesEstimateSum
-
 /*
  List sprints
 
