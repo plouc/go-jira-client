@@ -36,6 +36,7 @@ func NewJira(baseUrl string, apiPath string, activityPath string, auth *Auth) *J
 		ActivityPath: activityPath,
 		Client:       client,
 		Auth:         auth,
+		Encoding:      "json",
 	}
 }
 
@@ -77,6 +78,7 @@ type Jira struct {
 	ActivityPath string
 	GreenHopper  string
 	Encoding     string
+
 	Debug        bool
 
 	Auth   *Auth

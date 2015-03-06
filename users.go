@@ -74,7 +74,11 @@ Usage
 */
 func (j *Jira) User(username string) (*User, error) {
 	url := j.BaseUrl + j.ApiPath + user_url + "?username=" + username
+<<<<<<< HEAD
 	contents := j.buildAndExecRequest("GET", url, nil)
+=======
+	contents := j.buildAndExecRequest("GET", url,nil)
+>>>>>>> 88e7ce0... New functions for greenhopper endpoints.
 
 	user := new(User)
 	err := json.Unmarshal(contents, &user)

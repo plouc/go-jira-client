@@ -6,9 +6,10 @@ import (
 	"fmt"
 	"time"
 	"strconv"
-	//"github.com/plouc/go-jira-client"
+	"github.com/plouc/go-jira-client"
 	"io/ioutil"
 	"launchpad.net/goyaml"
+	"github.com/hekima/go-jira-client"
 )
 
 type Config struct {
