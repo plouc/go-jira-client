@@ -78,6 +78,7 @@ type ActivityFeed struct {
 	Entries  []*ActivityItem `xml:"entry"json:"entries"`
 }
 
+
 type Category struct {
 	Term string `xml:"term,attr"json:"term"`
 }
