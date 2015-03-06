@@ -12,10 +12,15 @@ import (
 	"math"
 )
 
+const (
+	dateLayout = "2006-01-02T15:04:05.000-0700"
+)
+
 type Jira struct {
 	BaseUrl      string
 	ApiPath      string
 	ActivityPath string
+	GreenHopper	 string
 	Client       *http.Client
 	Auth         *Auth
 }
@@ -108,6 +113,8 @@ type ActivityFeed struct {
 	Author   Person          `xml:"author"json:"author"`
 	Entries  []*ActivityItem `xml:"entry"json:"entries"`
 }
+
+
 	
 type Category struct {
 	Term string `xml:"term,attr"json:"term"`
@@ -143,9 +150,19 @@ func NewJira(baseUrl string, apiPath string, activityPath string, auth *Auth) *J
 	}
 }
 
-const (
-	dateLayout = "2006-01-02T15:04:05.000-0700"
-)
+func NewJIRA(baseUrl string, auth *Auth) *Jira {
+
+	client := &http.Client{}
+
+	return &Jira{
+		BaseUrl:      baseUrl,
+		ApiPath:      "/rest/api/latest",
+		ActivityPath: "/activity",
+		GreenHopper:  "/rest/greenhopper/latest",
+		Client:       client,
+		Auth:         auth,
+	}
+}
 
 func (j *Jira) buildAndExecRequest(method string, url string) []byte {
 	
@@ -227,3 +244,4 @@ func (j *Jira) Issue(id string) Issue {
 
 	return issue
 }
+
