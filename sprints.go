@@ -53,9 +53,7 @@ func (j *Jira) ListSprints(rapidViewId int,history bool,future bool) (*Sprints, 
 	url += "includeHistoricSprints="+strconv.FormatBool(history)
 	url += "&includeFutureSprints="+strconv.FormatBool(future)
 
-//	fmt.Println(url)
-
-	contents := j.buildAndExecRequest("GET", url)
+	contents := j.buildAndExecRequest("GET", url, nil)
 
 	sprints := new(Sprints)
 	err := json.Unmarshal(contents, &sprints)
@@ -79,9 +77,7 @@ func (j *Jira) GetSprintReport(rapidViewId int,sprintId int) (*SprintReport, err
 	url += "rapidViewId="+strconv.Itoa(rapidViewId)
 	url += "&sprintId="+strconv.Itoa(sprintId)
 
-//	fmt.Println(url)
-
-	contents := j.buildAndExecRequest("GET", url)
+	contents := j.buildAndExecRequest("GET", url, nil)
 
 	sprintReport := new(SprintReport)
 	err := json.Unmarshal(contents, &sprintReport)

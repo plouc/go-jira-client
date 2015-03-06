@@ -3,7 +3,9 @@ package gojira
 import (
     "fmt"
     "strings"
+    "net/url"
 	"encoding/json"
+    "strconv"
     "time"
 )
 
@@ -103,6 +105,50 @@ func (j *Jira) CreateIssue(fields *IssueFields) (rsp *IssueCreateResponse) {
 	}
 
     return
+}
+
+// search issues assigned to given user
+func (j *Jira) IssuesAssignedTo(user string, maxResults int, startAt int) IssueList {
+
+    url := j.BaseUrl + j.ApiPath + "/search?jql=assignee=\"" + url.QueryEscape(user) + "\"&startAt=" + strconv.Itoa(startAt) + "&maxResults=" + strconv.Itoa(maxResults)
+    contents := j.buildAndExecRequest("GET", url, nil)
+
+    var issues IssueList
+    err := json.Unmarshal(contents, &issues)
+    if err != nil {
+        fmt.Println("%s", err)
+    }
+
+    for _, issue := range issues.Issues {
+        t, _ := time.Parse(dateLayout, issue.Fields.Created)
+        issue.CreatedAt = t
+    }
+
+    pagination := Pagination{
+        Total:      issues.Total,
+        StartAt:    issues.StartAt,
+        MaxResults: issues.MaxResults,
+    }
+    pagination.Compute()
+
+    issues.Pagination = &pagination
+
+    return issues
+}
+
+// search an issue by its id
+func (j *Jira) Issue(id string) Issue {
+
+    url := j.BaseUrl + j.ApiPath + "/issue/" + id
+    contents := j.buildAndExecRequest("GET", url, nil)
+
+    var issue Issue
+    err := json.Unmarshal(contents, &issue)
+    if err != nil {
+        fmt.Println("%s", err)
+    }
+
+    return issue
 }
 
 type IssueCreateResponse struct {
