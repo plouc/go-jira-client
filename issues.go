@@ -82,6 +82,8 @@ func (j *Jira) CreateIssue(fields *IssueFields) (rsp *IssueCreateResponse) {
         subData["description"] = fields.Description
     }
 
+    subData["timetracking"] = fields.TimeTracking
+
     var postData []byte
     var err error
 
@@ -142,6 +144,8 @@ func (j *Jira) Issue(id string) Issue {
     url := j.BaseUrl + j.ApiPath + "/issue/" + id
     contents := j.buildAndExecRequest("GET", url, nil)
 
+    fmt.Println(url)
+
     var issue Issue
     err := json.Unmarshal(contents, &issue)
     if err != nil {
@@ -188,7 +192,13 @@ type IssueFields struct {
 	Assignee    *IssueUser
 	Project     *JiraProject
 	Created     string
+    TimeTracking *IssueTimeTracking `json:"timetracking"`
     Custom      map[string]interface{}
+}
+
+type IssueTimeTracking struct {
+    OriginalEstimate    string `json:"originalEstimate"`
+    RemainingEstimate    string `json:"remainingEstimate"`
 }
 
 // IssueType is mainly used for creating an issue, as such we're only
