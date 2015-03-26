@@ -34,9 +34,22 @@ type SprintContents struct {
 }
 
 type SprintReport struct {
-	Contents	SprintContents	`json:"contents"`
-	Sprint		Sprint			`json:"sprint"`
+	CompletedIssues	  []SprintIssues    `json:"completedIssues"`
+	IncompletedIssues []SprintIssues	`json:"incompletedIssues"`
+	Contents			SprintContents	`json:"contents"`
+	Sprint				Sprint			`json:"sprint"`
 }
+
+type SprintIssues struct {
+	Id					int		`json:"id"`
+	Key 				string	`json:"key"`
+	Hidden				bool	`json:"hidden"`
+	TypeName			string	`json:"typeName"`
+	Summary				string	`json:"sprint"`
+	Assignee			string	`json:"sprint"`
+	AssigneeName		string	`json:"sprint"`
+}
+
 
 /*
  List sprints
@@ -53,12 +66,20 @@ func (j *Jira) ListSprints(rapidViewId int,history bool,future bool) (*Sprints, 
 	url += "includeHistoricSprints="+strconv.FormatBool(history)
 	url += "&includeFutureSprints="+strconv.FormatBool(future)
 
+	if j.Debug {
+		fmt.Println(url)
+	}
+
 	contents := j.buildAndExecRequest("GET", url, nil)
 
 	sprints := new(Sprints)
 	err := json.Unmarshal(contents, &sprints)
 	if err != nil {
 		fmt.Println("%s", err)
+	}
+
+	if j.Debug {
+		fmt.Println(sprints)
 	}
 
 	return sprints, err
@@ -77,12 +98,20 @@ func (j *Jira) GetSprintReport(rapidViewId int,sprintId int) (*SprintReport, err
 	url += "rapidViewId="+strconv.Itoa(rapidViewId)
 	url += "&sprintId="+strconv.Itoa(sprintId)
 
+	if j.Debug {
+		fmt.Println(url)
+	}
+
 	contents := j.buildAndExecRequest("GET", url, nil)
 
 	sprintReport := new(SprintReport)
 	err := json.Unmarshal(contents, &sprintReport)
 	if err != nil {
 		fmt.Println("%s", err)
+	}
+
+	if j.Debug {
+		fmt.Println(sprintReport)
 	}
 
 	return sprintReport, err

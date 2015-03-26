@@ -79,6 +79,8 @@ type Jira struct {
 	GreenHopper	 string
 	Encoding	 string
 
+	Debug		 bool
+
 	Auth         *Auth
 	Client       *http.Client
 }

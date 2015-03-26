@@ -11,33 +11,35 @@ import (
 
 const (
     issue_url = "/issue/"
+    search_url = "/search/"
 )
 
 
-// CreateIssue creates a JIRA issue with given IssueFields.
-// Example:
-//
-//      jira := gojira.NewJira(... args ...)
-//
-//      // setting custom fields
-//      custom := make(map[string]interface{})
-//      custom["123451"] = 1
-//      custom["123452"] = "test custom data"
-//
-//      fields := &gojira.IssueFields{
-//          Project: &gojira.JiraProject{ Key: "TEST" },
-//          Summary: "some new issue summary",
-//          Description: "some new issue description",
-//          IssueType: &gojira.IssueType{ Name: "bug" },
-//          Custom: custom,
-//      }
-//
-//      if user, e := jira.User("someguy"); e == nil {
-//          fields.Assignee = user.Assignee()
-//      }
-//
-//      rsp := jira.CreateIssue(fields)
-//
+/*
+    CreateIssue creates a JIRA issue with given IssueFields.
+    Example:
+
+    jira := gojira.NewJira(... args ...)
+
+    // setting custom fields
+    custom := make(map[string]interface{})
+    custom["123451"] = 1
+    custom["123452"] = "test custom data"
+
+    fields := &gojira.IssueFields{
+      Project: &gojira.JiraProject{ Key: "TEST" },
+      Summary: "some new issue summary",
+      Description: "some new issue description",
+      IssueType: &gojira.IssueType{ Name: "bug" },
+      Custom: custom,
+    }
+
+    if user, e := jira.User("someguy"); e == nil {
+      fields.Assignee = user.Assignee()
+    }
+
+    rsp := jira.CreateIssue(fields)
+*/
 func (j *Jira) CreateIssue(fields *IssueFields) (rsp *IssueCreateResponse) {
 
     // Support custom fields.
@@ -82,7 +84,9 @@ func (j *Jira) CreateIssue(fields *IssueFields) (rsp *IssueCreateResponse) {
         subData["description"] = fields.Description
     }
 
-    subData["timetracking"] = fields.TimeTracking
+    if fields.TimeTracking != nil {
+        subData["timetracking"] = fields.TimeTracking
+    }
 
     var postData []byte
     var err error
@@ -99,17 +103,21 @@ func (j *Jira) CreateIssue(fields *IssueFields) (rsp *IssueCreateResponse) {
     r := j.buildAndExecRequest("POST", url, strings.NewReader(string(postData)))
     err = json.Unmarshal(r, rsp)
 	if err != nil {
-        fmt.Printf("Error unmarshaling response: %s\n\n", err)
-        fmt.Println("Raw request:")
-        fmt.Printf("%q\n\n", string(postData))
-        fmt.Println("Raw response:")
-        fmt.Printf("%s\n\n", string(r))
+        fmt.Printf("%s\n%s\n",err,string(r))
 	}
 
-    return
+    return rsp
 }
 
-// search issues assigned to given user
+/**
+  Search issues assigned to given user
+
+  user          string
+  maxResults    int
+  startAt       int
+
+  return IssueList
+*/
 func (j *Jira) IssuesAssignedTo(user string, maxResults int, startAt int) IssueList {
 
     url := j.BaseUrl + j.ApiPath + "/search?jql=assignee=\"" + url.QueryEscape(user) + "\"&startAt=" + strconv.Itoa(startAt) + "&maxResults=" + strconv.Itoa(maxResults)
@@ -138,18 +146,86 @@ func (j *Jira) IssuesAssignedTo(user string, maxResults int, startAt int) IssueL
     return issues
 }
 
-// search an issue by its id
-func (j *Jira) Issue(id string) Issue {
+/**
+ Search issues using jira sql. Please see Jira documentation to know how to build queries
 
-    url := j.BaseUrl + j.ApiPath + "/issue/" + id
+ jql            string  a JQL query string
+ startAt        int     the index of the first issue to return (0-based)
+ maxResults     int     the maximum number of issues to return (defaults to 50).
+ validateQuery  bool    whether to validate the JQL query
+ fields         string  the list of fields to return for each issue. By default, all navigable fields are returned.
+ expand         string  A comma-separated list of the parameters to expand.
+
+ return rsp     List of issues
+*/
+func (j *Jira) SearchIssues(jql string, startAt int,maxResults int,validateQuery bool, fields string, expand string) (rsp * IssueList){
+
+    url := j.BaseUrl + j.ApiPath + issue_url + search_url
+
+    url += "?jql=" + jql
+
+    if startAt > 0 {
+        url += fmt.Sprintf("&startAt=%d",startAt)
+    }
+
+    if maxResults > 0 {
+        url += fmt.Sprintf("&maxResults=%d",maxResults)
+    }
+
+    if !validateQuery {
+        url += fmt.Sprintf("&validateQuery=%t", validateQuery)
+    }
+
+    if fields != "" {
+        url += "&fields=" + fields
+    }
+
+    if expand != "" {
+        url += "&expand=" + expand
+    }
+
+    if j.Debug {
+        fmt.Println(url)
+    }
+
+    result := j.buildAndExecRequest("GET", url, nil)
+
+    err := json.Unmarshal(result, rsp)
+    if err != nil {
+        fmt.Println("%s", err)
+    }
+
+    if j.Debug {
+        fmt.Println(result)
+    }
+
+    return rsp
+}
+
+
+/*
+Search an issue by its id
+
+id      string          Key id
+
+return  Issue
+*/
+func (j *Jira) Issue(id string) (issue *Issue) {
+
+    url := j.BaseUrl + j.ApiPath + issue_url + id
     contents := j.buildAndExecRequest("GET", url, nil)
 
-    fmt.Println(url)
+    if j.Debug {
+        fmt.Println(url)
+    }
 
-    var issue Issue
     err := json.Unmarshal(contents, &issue)
     if err != nil {
         fmt.Println("%s", err)
+    }
+
+    if j.Debug {
+        fmt.Println(issue)
     }
 
     return issue
@@ -162,12 +238,12 @@ type IssueCreateResponse struct {
 }
 
 type Issue struct {
-    Id        string       `json:"-"`
+    Id        string       `json:"id"`
     Key       string       `json:"key"`
-	Self      string       `json:"-"`
-	Expand    string       `json:"-"`
-	Fields    *IssueFields `json:"-"`
-	CreatedAt time.Time    `json:"-"`
+	Self      string       `json:"self"`
+	Expand    string       `json:"expand"`
+	Fields    *IssueFields `json:"fields"`
+	CreatedAt time.Time    `json:""`
 }
 
 type IssueList struct {
@@ -184,14 +260,14 @@ type IssueUser struct {
 }
 
 type IssueFields struct {
-	IssueType   *IssueType
-	Parent      *Issue
-	Summary     string
-	Description string
-	Reporter    *IssueUser
-	Assignee    *IssueUser
-	Project     *JiraProject
-	Created     string
+	IssueType   *IssueType      `json:"issuetype"`
+	Parent      *Issue          `json:""`
+	Summary     string          `json:"summary"`
+    Description string          `json:"description"`
+	Reporter    *IssueUser      `json:"reporter"`
+	Assignee    *IssueUser      `json:"assignee"`
+	Project     *JiraProject    `json:""`
+	Created     string          `json:"created"`
     TimeTracking *IssueTimeTracking `json:"timetracking"`
     Custom      map[string]interface{}
 }
