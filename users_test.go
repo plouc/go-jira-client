@@ -2,7 +2,7 @@ package gojira_test
 
 import (
     "fmt"
-    "github.com/jmervine/go-jira-client"
+    "github.com/hekima/go-jira-client"
 )
 
 func ExampleJira_User() {

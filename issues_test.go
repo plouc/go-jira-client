@@ -6,7 +6,7 @@ import (
     "testing"
     "encoding/json"
     . "github.com/jmervine/GoT"
-    "github.com/jmervine/go-jira-client"
+    "github.com/hekima/go-jira-client"
 )
 
 func TestIssueCreateResponse(T *testing.T) {

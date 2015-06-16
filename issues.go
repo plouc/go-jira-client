@@ -1,3 +1,4 @@
+
 package gojira
 
 import (
@@ -7,11 +8,12 @@ import (
 	"encoding/json"
     "strconv"
     "time"
+
 )
 
 const (
-    issue_url = "/issue/"
-    search_url = "/search/"
+    issue_url = "/issue"
+    search_url = "/search"
 )
 
 
@@ -40,7 +42,7 @@ const (
 
     rsp := jira.CreateIssue(fields)
 */
-func (j *Jira) CreateIssue(fields *IssueFields) (rsp *IssueCreateResponse) {
+func (j *Jira) CreateIssue(fields *IssueFields) (rsp IssueCreateResponse) {
 
     // Support custom fields.
     dynData := make(map[string]interface{})
@@ -101,7 +103,7 @@ func (j *Jira) CreateIssue(fields *IssueFields) (rsp *IssueCreateResponse) {
 	}
 
     r := j.buildAndExecRequest("POST", url, strings.NewReader(string(postData)))
-    err = json.Unmarshal(r, rsp)
+    err = json.Unmarshal(r, &rsp)
 	if err != nil {
         fmt.Printf("%s\n%s\n",err,string(r))
 	}
@@ -128,20 +130,20 @@ func (j *Jira) IssuesAssignedTo(user string, maxResults int, startAt int) IssueL
     if err != nil {
         fmt.Println("%s", err)
     }
-
-    for _, issue := range issues.Issues {
-        t, _ := time.Parse(dateLayout, issue.Fields.Created)
-        issue.CreatedAt = t
-    }
-
-    pagination := Pagination{
-        Total:      issues.Total,
-        StartAt:    issues.StartAt,
-        MaxResults: issues.MaxResults,
-    }
-    pagination.Compute()
-
-    issues.Pagination = &pagination
+//
+//    for _, issue := range issues.Issues {
+//        t, _ := time.Parse(dateLayout, issue.Fields.Created)
+//        issue.CreatedAt = t
+//    }
+//
+//    pagination := Pagination{
+//        Total:      issues.Total,
+//        StartAt:    issues.StartAt,
+//        MaxResults: issues.MaxResults,
+//    }
+//    pagination.Compute()
+//
+//    issues.Pagination = &pagination
 
     return issues
 }
@@ -158,45 +160,46 @@ func (j *Jira) IssuesAssignedTo(user string, maxResults int, startAt int) IssueL
 
  return rsp     List of issues
 */
-func (j *Jira) SearchIssues(jql string, startAt int,maxResults int,validateQuery bool, fields string, expand string) (rsp * IssueList){
+func (j *Jira) SearchIssues(jql string, startAt int,maxResults int,validateQuery bool, fields string, expand string) (rsp IssueList){
 
-    url := j.BaseUrl + j.ApiPath + issue_url + search_url
+    requestUrl := j.BaseUrl + j.ApiPath + search_url
 
-    url += "?jql=" + jql
+    requestUrl += "?jql=" + url.QueryEscape(jql)
 
     if startAt > 0 {
-        url += fmt.Sprintf("&startAt=%d",startAt)
+        requestUrl += fmt.Sprintf("&startAt=%d",startAt)
     }
 
     if maxResults > 0 {
-        url += fmt.Sprintf("&maxResults=%d",maxResults)
+        requestUrl += fmt.Sprintf("&maxResults=%d",maxResults)
     }
 
     if !validateQuery {
-        url += fmt.Sprintf("&validateQuery=%t", validateQuery)
+        requestUrl += fmt.Sprintf("&validateQuery=%t", validateQuery)
     }
 
     if fields != "" {
-        url += "&fields=" + fields
+        requestUrl += "&fields=" + fields
     }
 
     if expand != "" {
-        url += "&expand=" + expand
+        requestUrl += "&expand=" + expand
     }
 
     if j.Debug {
-        fmt.Println(url)
+        fmt.Println(requestUrl)
     }
 
-    result := j.buildAndExecRequest("GET", url, nil)
+    result := j.buildAndExecRequest("GET", requestUrl, nil)
 
-    err := json.Unmarshal(result, rsp)
+    err := json.Unmarshal(result, &rsp)
     if err != nil {
-        fmt.Println("%s", err)
+        fmt.Println("ERR: %s", err)
     }
 
     if j.Debug {
-        fmt.Println(result)
+//        fmt.Println(result)
+//        fmt.Println(rsp)
     }
 
     return rsp
@@ -212,7 +215,7 @@ return  Issue
 */
 func (j *Jira) Issue(id string) (issue *Issue) {
 
-    url := j.BaseUrl + j.ApiPath + issue_url + id
+    url := j.BaseUrl + j.ApiPath + issue_url + "/" + id
     contents := j.buildAndExecRequest("GET", url, nil)
 
     if j.Debug {
@@ -243,33 +246,43 @@ type Issue struct {
 	Self      string       `json:"self"`
 	Expand    string       `json:"expand"`
 	Fields    *IssueFields `json:"fields"`
-	CreatedAt time.Time    `json:""`
+	CreatedAt time.Time
 }
 
 type IssueList struct {
-	Expand     string
-	StartAt    int
-	MaxResults int
-	Total      int
-	Issues     []*Issue
-	Pagination *Pagination
+	Expand     string       `json:"expand"`
+	StartAt    int          `json:"startAt"`
+	MaxResults int          `json:"maxResults"`
+	Total      int          `json:"total"`
+	Issues     []*Issue     `json:"issues"`
+	Pagination *Pagination  `json:"id"`
 }
 
 type IssueUser struct {
 	Name string `json:"name"`
 }
 
+type IssuePriority struct {
+    Id      string      `json:id`
+    Self    string      `json:self`
+//    IconUrl string      `json:id`
+    Name    string      `json:name`
+}
+
 type IssueFields struct {
-	IssueType   *IssueType      `json:"issuetype"`
-	Parent      *Issue          `json:""`
-	Summary     string          `json:"summary"`
-    Description string          `json:"description"`
-	Reporter    *IssueUser      `json:"reporter"`
-	Assignee    *IssueUser      `json:"assignee"`
-	Project     *JiraProject    `json:""`
-	Created     string          `json:"created"`
-    TimeTracking *IssueTimeTracking `json:"timetracking"`
-    Custom      map[string]interface{}
+	IssueType       *IssueType              `json:"issuetype"`
+	Parent          *Issue                  `json:"parent"`
+	Summary         string                  `json:"summary"`
+    Description     string                  `json:"description"`
+	Reporter        *IssueUser              `json:"reporter"`
+	Assignee        *IssueUser              `json:"assignee"`
+	Project         *JiraProject            `json:"project"`
+    Priority        *IssuePriority          `json:"priority"`
+	Created         string                  `json:"created"`
+    TimeSpent       int                     `json:"timespent"`
+    TimeEstimate    int                     `json:"aggregatetimeoriginalestimate"`
+    TimeTracking    *IssueTimeTracking      `json:"timetracking"`
+    Custom          map[string]interface{}
 }
 
 type IssueTimeTracking struct {
