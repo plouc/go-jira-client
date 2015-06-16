@@ -8,7 +8,6 @@ import (
 	"encoding/json"
     "strconv"
     "time"
-
 )
 
 const (
@@ -258,6 +257,13 @@ type IssueList struct {
 	Pagination *Pagination  `json:"id"`
 }
 
+type IssueStatus struct {
+    Self        string      `json:"self"`
+    Description string      `json:"description"`
+    Icon        string      `json:"iconUrl"`
+    Name        string      `json:"name"`
+}
+
 type IssueUser struct {
 	Name string `json:"name"`
 }
@@ -282,6 +288,7 @@ type IssueFields struct {
     TimeSpent       int                     `json:"timespent"`
     TimeEstimate    int                     `json:"aggregatetimeoriginalestimate"`
     TimeTracking    *IssueTimeTracking      `json:"timetracking"`
+    Status          *IssueStatus            `json:"status"`
     Custom          map[string]interface{}
 }
 
