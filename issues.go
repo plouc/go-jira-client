@@ -1,18 +1,18 @@
-
 package gojira
 
 import (
-    "fmt"
-    "strings"
-    "net/url"
+	"fmt"
+	"strings"
+	"net/url"
 	"encoding/json"
-    "strconv"
-    "time"
+	"strconv"
+	"time"
 )
 
 const (
-    issue_url = "/issue"
-    search_url = "/search"
+	issue_worklog_url = "/worklog"
+	issue_url = "/issue"
+	search_url = "/search"
 )
 
 
@@ -43,71 +43,71 @@ const (
 */
 func (j *Jira) CreateIssue(fields *IssueFields) (rsp IssueCreateResponse) {
 
-    // Support custom fields.
-    dynData := make(map[string]interface{})
-    subData := make(map[string]interface{})
+	// Support custom fields.
+	dynData := make(map[string]interface{})
+	subData := make(map[string]interface{})
 
-    // Required
-    if fields.IssueType != nil && fields.IssueType.Name != "" {
-        subData["issuetype"] = fields.IssueType
-    } else {
-        fmt.Println("Error CreateIssue requires *IssueFields.IssueType.Name")
-        return
-    }
+	// Required
+	if fields.IssueType != nil && fields.IssueType.Name != "" {
+		subData["issuetype"] = fields.IssueType
+	} else {
+		fmt.Println("Error CreateIssue requires *IssueFields.IssueType.Name")
+		return
+	}
 
-    // Required
-    if fields.Project != nil && fields.Project.Key != "" {
-        subData["project"] = fields.Project
-    } else {
-        fmt.Println("Error CreateIssue requires *IssueFields.Project.Key")
-        return
-    }
+	// Required
+	if fields.Project != nil && fields.Project.Key != "" {
+		subData["project"] = fields.Project
+	} else {
+		fmt.Println("Error CreateIssue requires *IssueFields.Project.Key")
+		return
+	}
 
-    if fields.Parent != nil {
-        subData["parent"] = fields.Parent
-    }
+	if fields.Parent != nil {
+		subData["parent"] = fields.Parent
+	}
 
-    if fields.Assignee != nil {
-        subData["assignee"] = fields.Assignee
-    }
+	if fields.Assignee != nil {
+		subData["assignee"] = fields.Assignee
+	}
 
 	for k, v := range fields.Custom {
 		subData["custom_"+k] = v
 	}
 
-    if fields.Summary == "" {
-        fmt.Println("Error CreateIssue requires *IssueFields.Summary")
-        return
-    }
-    subData["summary"] = fields.Summary
+	if fields.Summary == "" {
+		fmt.Println("Error CreateIssue requires *IssueFields.Summary")
+		return
+	}
+	subData["summary"] = fields.Summary
 
-    if fields.Description != "" {
-        subData["description"] = fields.Description
-    }
-
-    if fields.TimeTracking != nil {
-        subData["timetracking"] = fields.TimeTracking
-    }
-
-    var postData []byte
-    var err error
-
-    url := j.BaseUrl + j.ApiPath + issue_url
-
-    dynData["fields"] = subData
-    postData, err = json.Marshal(dynData)
-	if err != nil {
-        fmt.Printf("Error marshaling fields: %s\n", err)
-        return
+	if fields.Description != "" {
+		subData["description"] = fields.Description
 	}
 
-    r := j.buildAndExecRequest("POST", url, strings.NewReader(string(postData)))
-    err = json.Unmarshal(r, &rsp)
-	if err != nil {
-        fmt.Printf("%s\n%s\n",err,string(r))
+	if fields.TimeTracking != nil {
+		subData["timetracking"] = fields.TimeTracking
 	}
 
-    return rsp
+	var postData []byte
+	var err error
+
+	url := j.BaseUrl + j.ApiPath + issue_url
+
+	dynData["fields"] = subData
+	postData, err = json.Marshal(dynData)
+	if err != nil {
+		fmt.Printf("Error marshaling fields: %s\n", err)
+		return
+	}
+
+	r := j.buildAndExecRequest("POST", url, strings.NewReader(string(postData)))
+	err = json.Unmarshal(r, &rsp)
+	if err != nil {
+		fmt.Printf("%s\n%s\n", err, string(r))
+	}
+
+	return rsp
 }
 
 /**
@@ -121,30 +121,30 @@ func (j *Jira) CreateIssue(fields *IssueFields) (rsp IssueCreateResponse) {
 */
 func (j *Jira) IssuesAssignedTo(user string, maxResults int, startAt int) IssueList {
 
-    url := j.BaseUrl + j.ApiPath + "/search?jql=assignee=\"" + url.QueryEscape(user) + "\"&startAt=" + strconv.Itoa(startAt) + "&maxResults=" + strconv.Itoa(maxResults)
-    contents := j.buildAndExecRequest("GET", url, nil)
+	url := j.BaseUrl + j.ApiPath + "/search?jql=assignee=\"" + url.QueryEscape(user) + "\"&startAt=" + strconv.Itoa(startAt) + "&maxResults=" + strconv.Itoa(maxResults)
+	contents := j.buildAndExecRequest("GET", url, nil)
 
-    var issues IssueList
-    err := json.Unmarshal(contents, &issues)
-    if err != nil {
-        fmt.Println("%s", err)
-    }
-//
-//    for _, issue := range issues.Issues {
-//        t, _ := time.Parse(dateLayout, issue.Fields.Created)
-//        issue.CreatedAt = t
-//    }
-//
-//    pagination := Pagination{
-//        Total:      issues.Total,
-//        StartAt:    issues.StartAt,
-//        MaxResults: issues.MaxResults,
-//    }
-//    pagination.Compute()
-//
-//    issues.Pagination = &pagination
+	var issues IssueList
+	err := json.Unmarshal(contents, &issues)
+	if err != nil {
+		fmt.Println("%s", err)
+	}
+	//
+	//    for _, issue := range issues.Issues {
+	//        t, _ := time.Parse(dateLayout, issue.Fields.Created)
+	//        issue.CreatedAt = t
+	//    }
+	//
+	//    pagination := Pagination{
+	//        Total:      issues.Total,
+	//        StartAt:    issues.StartAt,
+	//        MaxResults: issues.MaxResults,
+	//    }
+	//    pagination.Compute()
+	//
+	//    issues.Pagination = &pagination
 
-    return issues
+	return issues
 }
 
 /**
@@ -159,51 +159,82 @@ func (j *Jira) IssuesAssignedTo(user string, maxResults int, startAt int) IssueL
 
  return rsp     List of issues
 */
-func (j *Jira) SearchIssues(jql string, startAt int,maxResults int,validateQuery bool, fields string, expand string) (rsp IssueList){
+func (j *Jira) SearchIssues(jql string, startAt int, maxResults int, validateQuery bool, fields string, expand string) (rsp IssueList) {
 
-    requestUrl := j.BaseUrl + j.ApiPath + search_url
+	requestUrl := j.BaseUrl + j.ApiPath + search_url
 
-    requestUrl += "?jql=" + url.QueryEscape(jql)
+	requestUrl += "?jql=" + url.QueryEscape(jql)
 
-    if startAt > 0 {
-        requestUrl += fmt.Sprintf("&startAt=%d",startAt)
-    }
+	if startAt > 0 {
+		requestUrl += fmt.Sprintf("&startAt=%d", startAt)
+	}
 
-    if maxResults > 0 {
-        requestUrl += fmt.Sprintf("&maxResults=%d",maxResults)
-    }
+	if maxResults > 0 {
+		requestUrl += fmt.Sprintf("&maxResults=%d", maxResults)
+	}
 
-    if !validateQuery {
-        requestUrl += fmt.Sprintf("&validateQuery=%t", validateQuery)
-    }
+	if !validateQuery {
+		requestUrl += fmt.Sprintf("&validateQuery=%t", validateQuery)
+	}
 
-    if fields != "" {
-        requestUrl += "&fields=" + fields
-    }
+	if fields != "" {
+		requestUrl += "&fields=" + fields
+	}
 
-    if expand != "" {
-        requestUrl += "&expand=" + expand
-    }
+	if expand != "" {
+		requestUrl += "&expand=" + expand
+	}
 
-    if j.Debug {
-        fmt.Println(requestUrl)
-    }
+	if j.Debug {
+		fmt.Println(requestUrl)
+	}
 
-    result := j.buildAndExecRequest("GET", requestUrl, nil)
+	result := j.buildAndExecRequest("GET", requestUrl, nil)
 
-    err := json.Unmarshal(result, &rsp)
-    if err != nil {
-        fmt.Println("ERR: %s", err)
-    }
+	err := json.Unmarshal(result, &rsp)
+	if err != nil {
+		fmt.Println("ERR: %s", err)
+	}
 
-    if j.Debug {
-//        fmt.Println(result)
-//        fmt.Println(rsp)
-    }
+	if j.Debug {
+		//        fmt.Println(result)
+		//        fmt.Println(rsp)
+	}
 
-    return rsp
+	return rsp
 }
 
+// Adds a new worklog entry to an issue.
+//
+// https://jira.atlassian.com/plugins/servlet/restbrowser#/resource/api-2-issue-issueidorkey-worklog/POST
+//
+// issue - the worklogs belongs to
+// adjust - (optional) allows you to provide specific instructions to update the remaining time estimate of the issue.
+// 			Valid values are
+// 			"new" - sets the estimate to a specific value
+// 			"leave"- leaves the estimate as is
+//			"manual" - specify a specific amount to increase remaining estimate by
+// 			"auto"- Default option. Will automatically adjust the value based on the new timeSpent specified on the
+// 			worklog
+// new - 	(required when "new" is selected for adjustEstimate) the new value for the remaining estimate field. "2d"
+// reduceBy - (required when "manual" is selected for adjustEstimate) the amount to reduce the remaining estimate by "2d"
+func (j *Jira) LogWork(issue, adjust, new, reduceBy string, worklog IssueWorklog) {
+
+	requestUrl := j.BaseUrl + j.ApiPath + issue_url + "/"+ issue + issue_worklog_url + "?adjustEstimate=auto";
+
+	fmt.Println(requestUrl);
+
+	requestBody, err := json.Marshal(worklog)
+	if err != nil {
+		fmt.Println("ERR: %s", err)
+	}
+
+	fmt.Println(string(requestBody))
+
+	contents := j.buildAndExecRequest("POST", requestUrl, strings.NewReader(string(requestBody)))
+
+	fmt.Println(string(contents[:]))
+}
 
 /*
 Search an issue by its id
@@ -214,23 +245,23 @@ return  Issue
 */
 func (j *Jira) Issue(id string) (issue *Issue) {
 
-    url := j.BaseUrl + j.ApiPath + issue_url + "/" + id
-    contents := j.buildAndExecRequest("GET", url, nil)
+	url := j.BaseUrl + j.ApiPath + issue_url + "/" + id
+	contents := j.buildAndExecRequest("GET", url, nil)
 
-    if j.Debug {
-        fmt.Println(url)
-    }
+	if j.Debug {
+		fmt.Println(url)
+	}
 
-    err := json.Unmarshal(contents, &issue)
-    if err != nil {
-        fmt.Println("%s", err)
-    }
+	err := json.Unmarshal(contents, &issue)
+	if err != nil {
+		fmt.Println("%s", err)
+	}
 
-    if j.Debug {
-        fmt.Println(issue)
-    }
+	if j.Debug {
+		fmt.Println(issue)
+	}
 
-    return issue
+	return issue
 }
 
 type IssueCreateResponse struct {
@@ -240,8 +271,8 @@ type IssueCreateResponse struct {
 }
 
 type Issue struct {
-    Id        string       `json:"id"`
-    Key       string       `json:"key"`
+	Id        string       `json:"id"`
+	Key       string       `json:"key"`
 	Self      string       `json:"self"`
 	Expand    string       `json:"expand"`
 	Fields    *IssueFields `json:"fields"`
@@ -258,10 +289,10 @@ type IssueList struct {
 }
 
 type IssueStatus struct {
-    Self        string      `json:"self"`
-    Description string      `json:"description"`
-    Icon        string      `json:"iconUrl"`
-    Name        string      `json:"name"`
+	Self        string      `json:"self"`
+	Description string      `json:"description"`
+	Icon        string      `json:"iconUrl"`
+	Name        string      `json:"name"`
 }
 
 type IssueUser struct {
@@ -269,43 +300,61 @@ type IssueUser struct {
 }
 
 type IssuePriority struct {
-    Id      string      `json:id`
-    Self    string      `json:self`
-//    IconUrl string      `json:id`
-    Name    string      `json:name`
+	Id   string      `json:id`
+	Self string      `json:self`
+	//    IconUrl string      `json:id`
+	Name string      `json:name`
 }
 
 type IssueFields struct {
-	IssueType       *IssueType              `json:"issuetype"`
-	Parent          *Issue                  `json:"parent"`
-	Summary         string                  `json:"summary"`
-    Description     string                  `json:"description"`
-	Reporter        *IssueUser              `json:"reporter"`
-	Assignee        *IssueUser              `json:"assignee"`
-	Project         *JiraProject            `json:"project"`
-    Priority        *IssuePriority          `json:"priority"`
-	Created         string                  `json:"created"`
-    TimeSpent       int                     `json:"timespent"`
-    TimeEstimate    int                     `json:"aggregatetimeoriginalestimate"`
-    TimeTracking    *IssueTimeTracking      `json:"timetracking"`
-    Status          *IssueStatus            `json:"status"`
-    Custom          map[string]interface{}
+	IssueType    *IssueType              `json:"issuetype"`
+	Parent       *Issue                  `json:"parent"`
+	Summary      string                  `json:"summary"`
+	Description  string                  `json:"description"`
+	Reporter     *IssueUser              `json:"reporter"`
+	Assignee     *IssueUser              `json:"assignee"`
+	Project      *JiraProject            `json:"project"`
+	Priority     *IssuePriority          `json:"priority"`
+	Created      string                  `json:"created"`
+	TimeSpent    int                     `json:"timespent"`
+	TimeEstimate int                     `json:"aggregatetimeoriginalestimate"`
+	TimeTracking *IssueTimeTracking      `json:"timetracking"`
+	Status       *IssueStatus            `json:"status"`
+	SprintPoints float32                 `json:"customfield_10004"`
+	Labels       []string                `json:"labels"`
+	Custom       map[string]interface{}
 }
 
 type IssueTimeTracking struct {
-    OriginalEstimate    string `json:"originalEstimate"`
-    RemainingEstimate    string `json:"remainingEstimate"`
+	OriginalEstimate  string `json:"originalEstimate"`
+	RemainingEstimate string `json:"remainingEstimate"`
 }
 
 // IssueType is mainly used for creating an issue, as such we're only
 // including json mapping for that which we want added to the out going
 // json message.
 type IssueType struct {
-    Self        string `json:"-"`
-    Id          string `json:"-"`
-    Description string `json:"-"`
-    IconUrl     string `json:"-"`
-    Name        string `json:"name"`
-    Subtask     bool   `json:"subtask"`
+	Self        string `json:"-"`
+	Id          string `json:"-"`
+	Description string `json:"-"`
+	IconUrl     string `json:"-"`
+	Name        string `json:"name"`
+	Subtask     bool   `json:"subtask"`
 }
 
+type IssueAuthor struct {
+	Self         string `json:"self"`
+	Name         string `json:"name"`
+	Key          string `json:"key"`
+	EmailAddress string `json:"emailAddress"`
+	DisplayName  string `json:"displayName"`
+	Active       bool   `json:"active"`
+}
+
+type IssueWorklog struct {
+	Self          string `json:"self"`
+	Comment       string    `json:"comment"`
+	TimeSpent     string `json:"timeSpent"`
+	Author        IssueAuthor `json:"author"`
+	UpdatedAuthor IssueAuthor `json:"updateAuthor"`
+}

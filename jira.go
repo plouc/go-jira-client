@@ -36,7 +36,7 @@ func NewJIRA(baseUrl string, auth *Auth) *Jira {
 		GreenHopper:  "/rest/greenhopper/latest",
 		Client:       client,
 		Auth:         auth,
-		Encoding:	  "json",
+		Encoding:      "json",
 	}
 }
 
@@ -48,16 +48,17 @@ func (j *Jira) buildAndExecRequest(method string, url string, data io.Reader) []
 	}
 	req.SetBasicAuth(j.Auth.Login, j.Auth.Password)
 
-    if data != nil {
-        req.Header.Add("Content-Type", "application/json")
-    }
+	if data != nil {
+		req.Header.Add("Content-Type", "application/json")
+	}
 
 	resp, err := j.Client.Do(req)
-	defer resp.Body.Close()
-	contents, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Printf("%s", err)
 	}
+	defer resp.Body.Close()
+	contents, err := ioutil.ReadAll(resp.Body)
+
 
 	return contents
 }
@@ -76,10 +77,10 @@ type Jira struct {
 	BaseUrl      string
 	ApiPath      string
 	ActivityPath string
-	GreenHopper	 string
-	Encoding	 string
+	GreenHopper  string
+	Encoding     string
 
-	Debug		 bool
+	Debug        bool
 
 	Auth         *Auth
 	Client       *http.Client
