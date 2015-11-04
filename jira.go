@@ -70,6 +70,7 @@ type IssueFields struct {
 	Assignee    *User
 	Project     *JiraProject
 	Created     string
+	Status      *IssueStatus
 }
 
 type IssueType struct {
@@ -79,6 +80,10 @@ type IssueType struct {
 	IconUrl     string
 	Name        string
 	Subtask     bool
+}
+
+type IssueStatus struct {
+	Name        string
 }
 
 type JiraProject struct {
