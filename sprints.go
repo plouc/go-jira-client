@@ -31,9 +31,13 @@ type TextValue struct {
 }
 
 type SprintContents struct {
-	CompletedIssuesEstimateSum TextValue        `json:"completedIssuesEstimateSum"`
-	AllIssuesEstimateSum       TextValue        `json:"allIssuesEstimateSum"`
-	ScopeChange                map[string]bool `json:"issueKeysAddedDuringSprint"`
+	CompletedIssuesInitialEstimateSum    TextValue        `json:"completedIssuesInitialEstimateSum"`
+	CompletedIssuesEstimateSum           TextValue        `json:"completedIssuesEstimateSum"`
+	IssuesNotCompletedInitialEstimateSum TextValue        `json:"issuesNotCompletedInitialEstimateSum"`
+	issuesNotCompletedEstimateSum        TextValue        `json:"issuesNotCompletedEstimateSum"`
+	AllIssuesEstimateSum                 TextValue        `json:"allIssuesEstimateSum"`
+
+	ScopeChange                          map[string]bool `json:"issueKeysAddedDuringSprint"`
 }
 
 type SprintReport struct {

@@ -6,7 +6,6 @@ import (
 	"net/url"
 	"encoding/json"
 	"strconv"
-	"time"
 )
 
 const (
@@ -271,12 +270,26 @@ type IssueCreateResponse struct {
 }
 
 type Issue struct {
-	Id        string       `json:"id"`
-	Key       string       `json:"key"`
-	Self      string       `json:"self"`
-	Expand    string       `json:"expand"`
-	Fields    *IssueFields `json:"fields"`
-	CreatedAt time.Time
+	Id        string            `json:"id"`
+	Key       string            `json:"key"`
+	Self      string            `json:"self"`
+	Expand    string            `json:"expand"`
+	Fields    *IssueFields      `json:"fields"`
+	ChangeLog *IssueChangeLog   `json:"changelog"`
+}
+
+type IssueChangeLog struct {
+	StartAt   int            `json:"startAt"`
+	MaxResult int            `json:"maxResults"`
+	Total     int            `json:"total"`
+	Histories []*IssueChangeLogHistory `json:"histories"`
+}
+
+type IssueChangeLogHistory struct {
+	Id      string                    `json:"id"`
+	Author  *IssueAuthor                `json:"author"`
+	Created CustomTime                `json:"created"`
+	Item    []map[string]interface{}  `json:"items"`
 }
 
 type IssueList struct {
@@ -315,7 +328,7 @@ type IssueFields struct {
 	Assignee     *IssueUser              `json:"assignee"`
 	Project      *JiraProject            `json:"project"`
 	Priority     *IssuePriority          `json:"priority"`
-	Created      string                  `json:"created"`
+	Created      CustomTime              `json:"created"`
 	TimeSpent    int                     `json:"timespent"`
 	TimeEstimate int                     `json:"aggregatetimeoriginalestimate"`
 	TimeTracking *IssueTimeTracking      `json:"timetracking"`
