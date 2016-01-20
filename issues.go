@@ -287,7 +287,7 @@ type IssueChangeLog struct {
 
 type IssueChangeLogHistory struct {
 	Id      string                    `json:"id"`
-	Author  *IssueAuthor                `json:"author"`
+	Author  *IssueAuthor              `json:"author"`
 	Created CustomTime                `json:"created"`
 	Item    []map[string]interface{}  `json:"items"`
 }
@@ -365,9 +365,9 @@ type IssueAuthor struct {
 }
 
 type IssueWorklog struct {
-	Self          string `json:"self"`
-	Comment       string    `json:"comment"`
-	TimeSpent     string `json:"timeSpent"`
-	Author        IssueAuthor `json:"author"`
-	UpdatedAuthor IssueAuthor `json:"updateAuthor"`
+	Self          string 		`json:"self"`
+	Comment       string    	`json:"comment"`
+	TimeSpent     string 		`json:"timeSpent"`
+	Author        IssueAuthor 	`json:"author"`
+	UpdatedAuthor IssueAuthor 	`json:"updateAuthor"`
 }
