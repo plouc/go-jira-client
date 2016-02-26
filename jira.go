@@ -191,8 +191,16 @@ func (j *Jira) Activity(url string) (ActivityFeed, error) {
 
 // search issues assigned to given user
 func (j *Jira) IssuesAssignedTo(user string, maxResults int, startAt int) IssueList {
-
 	url := j.BaseUrl + j.ApiPath + "/search?jql=assignee=\"" + url.QueryEscape(user) + "\"&startAt=" + strconv.Itoa(startAt) + "&maxResults=" + strconv.Itoa(maxResults)
+	return j.queryToIssueList(url)
+}
+
+func (j *Jira) IssuesByRawJQL(jql string) IssueList {
+	url := j.BaseUrl + j.ApiPath + "/search?jql=" + url.QueryEscape(jql)
+	return j.queryToIssueList(url)
+}
+
+func (j *Jira) queryToIssueList(url string) IssueList {
 	contents := j.buildAndExecRequest("GET", url)
 
 	var issues IssueList
@@ -202,8 +210,8 @@ func (j *Jira) IssuesAssignedTo(user string, maxResults int, startAt int) IssueL
 	}
 
 	for _, issue := range issues.Issues {
-    	t, _ := time.Parse(dateLayout, issue.Fields.Created)
-    	issue.CreatedAt = t
+		t, _ := time.Parse(dateLayout, issue.Fields.Created)
+		issue.CreatedAt = t
 	}
 
 	pagination := Pagination{
