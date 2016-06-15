@@ -49,11 +49,11 @@ func main() {
 	)
 
 	var method string
-	flag.StringVar(&method, "m", "", "Specify method to retrieve user(s) data, available methods:\n"+
-		"  > -m user -u USERNAME")
+	flag.StringVar(&method, "m", "", "Specify method to retrieve issue(s) data, available methods:\n"+
+		"  > -m issue -id ISSUE_ID")
 
-	var username string
-	flag.StringVar(&username, "u", "", "Specify username")
+	var id string
+	flag.StringVar(&id, "id", "", "Specify issue id")
 
 	flag.Usage = func() {
 		fmt.Printf("Usage:\n")
@@ -67,25 +67,25 @@ func main() {
 	}
 
 	switch method {
-	case "user":
-		if username == "" {
+	case "issue":
+		if id == "" {
 			flag.Usage()
 			return
 		}
 
-		user, err := jira.User(username)
-		if err != nil {
-			fmt.Println(err.Error())
-			return
-		}
+		issue := jira.Issue(id)
 
 		format := "> %-14s: %s\n"
 
-		fmt.Printf("%s\n", user.Name)
-		fmt.Printf(format, "self", user.Self)
-		fmt.Printf(format, "email address", user.EmailAddress)
-		fmt.Printf(format, "display name", user.DisplayName)
-		fmt.Printf(format, "active", strconv.FormatBool(user.Active))
-		fmt.Printf(format, "time zone", user.TimeZone)
+		fmt.Printf("%s\n", issue.Id)
+		fmt.Printf(format, "self", issue.Self)
+		fmt.Printf(format, "key", issue.Key)
+		fmt.Printf(format, "expand", issue.Expand)
+		fields := issue.Fields
+		fmt.Printf(format, "summary", fields.Summary)
+		fmt.Printf(format, "reporter", fields.Reporter.Name)
+		fmt.Printf(format, "assignee", fields.Assignee.Name)
+		fmt.Printf(format, "is subtask?", strconv.FormatBool(fields.IssueType.Subtask))
+		//fmt.Printf(format, "created at", issue.CreatedAt)
 	}
 }
