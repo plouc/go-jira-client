@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"encoding/json"
 	"strconv"
+	"time"
 )
 
 const (
@@ -263,6 +264,31 @@ func (j *Jira) Issue(id string) (issue *Issue) {
 	return issue
 }
 
+func (j *Jira) IssuesByRawJQL(jql string) IssueList {
+	url := j.BaseUrl + j.ApiPath + "/search?jql=" + url.QueryEscape(jql)
+	return j.queryToIssueList(url)
+}
+
+func (j *Jira) queryToIssueList(url string) IssueList {
+	contents := j.buildAndExecRequest("GET", url,nil)
+
+	var issues IssueList
+	err := json.Unmarshal(contents, &issues)
+	if err != nil {
+		fmt.Println("%s", err)
+	}
+
+	pagination := Pagination{
+		Total:      issues.Total,
+		StartAt:    issues.StartAt,
+		MaxResults: issues.MaxResults,
+	}
+	pagination.Compute()
+
+	return issues
+}
+
+
 type IssueCreateResponse struct {
 	Id   string `json:"id"`
 	Key  string `json:"key"`
@@ -275,6 +301,7 @@ type Issue struct {
 	Self      string            `json:"self"`
 	Expand    string            `json:"expand"`
 	Fields    *IssueFields      `json:"fields"`
+	CreatedAt time.Time
 	ChangeLog *IssueChangeLog   `json:"changelog"`
 }
 

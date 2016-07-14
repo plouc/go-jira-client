@@ -12,21 +12,7 @@ const (
 	dateLayout = "2006-01-02T15:04:05.000-0700"
 )
 
-func NewJira(baseUrl string, apiPath string, activityPath string, auth *Auth) *Jira {
-
-	client := &http.Client{}
-
-	return &Jira{
-		BaseUrl:      baseUrl,
-		ApiPath:      apiPath,
-		ActivityPath: activityPath,
-		Client:       client,
-		Auth:         auth,
-	}
-}
-
 func NewJIRA(baseUrl string, auth *Auth) *Jira {
-
 	client := &http.Client{}
 
 	return &Jira{
@@ -37,6 +23,20 @@ func NewJIRA(baseUrl string, auth *Auth) *Jira {
 		Client:       client,
 		Auth:         auth,
 		Encoding:      "json",
+	}
+}
+
+
+func NewJira(baseUrl string, apiPath string, activityPath string, auth *Auth) *Jira {
+
+	client := &http.Client{}
+
+	return &Jira{
+		BaseUrl:      baseUrl,
+		ApiPath:      apiPath,
+		ActivityPath: activityPath,
+		Client:       client,
+		Auth:         auth,
 	}
 }
 
@@ -79,7 +79,6 @@ type Jira struct {
 	ActivityPath string
 	GreenHopper  string
 	Encoding     string
-
 	Debug        bool
 
 	Auth         *Auth
