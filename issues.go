@@ -189,7 +189,7 @@ func (j *Jira) SearchIssues(jql string, startAt int, maxResults int, validateQue
 	}
 
 	result := j.buildAndExecRequest("GET", requestUrl, nil)
-
+	//print(string(result[:]))
 	err := json.Unmarshal(result, &rsp)
 	if err != nil {
 		fmt.Println("ERR: %s", err)
@@ -319,6 +319,29 @@ type IssuePriority struct {
 	Name string      `json:name`
 }
 
+type WorkLogList struct {
+	StartAt     int	         `json:"startAt"`
+	MaxResults  int		 `json:"maxResults"`
+	Total	    int		 `json:"total"`
+	WorkLogs    []WorkLogs	 `json:"worklogs"`
+
+}
+
+type WorkLogs struct {
+	Id               string     	`json:"id"`
+	Self		 string	    	`json:"self"`
+	Comment          string     	`json:"comment"`
+	TimeSpent        string     	`json:"timeSpent"`
+	TimeSpentSeconds int		`json:"timeSpentSeconds"`
+	Author           *IssueAuthor   `json:"author"`
+	//AuthorName       string     `json:"authorFullName"`
+	//Created          int        `json:"created"`
+	StartDate        CustomTime     `json:"started"`
+	//UpdateAuthor     string     `json:"updateAuthor"`
+	//UpdateAuthorName string     `json:"updateAuthorFullName"`
+	//Updated          int        `json:"updated"`
+}
+
 type IssueFields struct {
 	IssueType    *IssueType              `json:"issuetype"`
 	Parent       *Issue                  `json:"parent"`
@@ -335,6 +358,7 @@ type IssueFields struct {
 	Status       *IssueStatus            `json:"status"`
 	SprintPoints float32                 `json:"customfield_10004"`
 	Labels       []string                `json:"labels"`
+	WorkLog      *WorkLogList	     `json:"worklog"`
 	Custom       map[string]interface{}
 }
 

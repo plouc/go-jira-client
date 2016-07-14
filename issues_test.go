@@ -2,10 +2,8 @@ package gojira_test
 
 import (
     "fmt"
-    "time"
     "testing"
     "encoding/json"
-    . "github.com/jmervine/GoT"
     "github.com/hekima/go-jira-client"
 )
 
@@ -29,14 +27,12 @@ func TestIssue(T *testing.T) {
     issue := gojira.Issue{
         Id: "ID",
         Key: "KEY",
-        CreatedAt: time.Now(),
     }
 
     issue_json, err := json.Marshal(&issue)
 
-    Go(T).AssertNil(err)
-    Go(T).AssertEqual(issue_json, []byte(`{"key":"KEY"}`),
-                "Issue should only marshal with Key")
+    Go(T).AssertNil(err)    
+    Go(T).AssertEqual(issue_json, []byte(`{"Id": "ID", "Key":"KEY"}`),"Issue should only marshal with Key")
 }
 
 func TestIssueType(T *testing.T) {

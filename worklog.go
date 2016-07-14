@@ -11,7 +11,7 @@ import (
 // https://zahpee.atlassian.net/rest/timesheet-gadget/1.0/raw-timesheet.json?targetUser=gabriel.campos&startDate=2015-08-01
 
 const (
-	worklog_url = "/rest/timesheet-gadget/1.0/raw-timesheet.json"
+	worklog_url = "/rest/api/latest/search"
 	worklogDateFormat = "2006-01-02"
 )
 
@@ -28,19 +28,20 @@ type Worklog struct {
 
 type Logs struct {
 	Id               int        `json:"id"`
-	Comment          string        `json:"comment"`
+	Comment          string     `json:"comment"`
 	TimeSpent        int        `json:"timeSpent"`
-	Author           string    `json:"author"`
-	AuthorName       string    `json:"authorFullName"`
+	Author           string     `json:"author"`
+	AuthorName       string     `json:"authorFullName"`
 	Created          int        `json:"created"`
 	StartDate        int        `json:"startDate"`
-	UpdateAuthor     string    `json:"updateAuthor"`
-	UpdateAuthorName string    `json:"updateAuthorFullName"`
+	UpdateAuthor     string     `json:"updateAuthor"`
+	UpdateAuthorName string     `json:"updateAuthorFullName"`
 	Updated          int        `json:"updated"`
 }
 
 func (j *Jira) Worklog(username string, start, end time.Time) (*WorklogResponse, error) {
-	url := j.BaseUrl + worklog_url + "?targetUser="+username+"&startDate="+start.Format(worklogDateFormat)+"&endDate="+end.Format(worklogDateFormat)
+	url := j.BaseUrl + worklog_url + "?targetUser="+username+"&worklogDate="+start.Format(worklogDateFormat)+"&worklogDate="+end.Format(worklogDateFormat)
+	url += "fields=worklog"
 
 	if j.Debug {
 		fmt.Println(url)
