@@ -1,7 +1,8 @@
 package gojira
+
 import (
-	"time"
 	"fmt"
+	"time"
 )
 
 type CustomTime struct {
@@ -20,10 +21,11 @@ func (ct *CustomTime) UnmarshalJSON(b []byte) (err error) {
 }
 
 func (ct *CustomTime) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf("%d",(ct.Time.UnixNano() / int64(time.Millisecond)))), nil
+	return []byte(fmt.Sprintf("%d", (ct.Time.UnixNano() / int64(time.Millisecond)))), nil
 }
 
 var nilTime = (time.Time{}).UnixNano()
+
 func (ct *CustomTime) IsSet() bool {
 	return ct.UnixNano() != nilTime
 }

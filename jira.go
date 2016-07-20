@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"net/http"
 	"math"
+	"net/http"
 )
 
 const (
@@ -22,10 +22,9 @@ func NewJIRA(baseUrl string, auth *Auth) *Jira {
 		GreenHopper:  "/rest/greenhopper/latest",
 		Client:       client,
 		Auth:         auth,
-		Encoding:      "json",
+		Encoding:     "json",
 	}
 }
-
 
 func NewJira(baseUrl string, apiPath string, activityPath string, auth *Auth) *Jira {
 
@@ -59,7 +58,6 @@ func (j *Jira) buildAndExecRequest(method string, url string, data io.Reader) []
 	defer resp.Body.Close()
 	contents, err := ioutil.ReadAll(resp.Body)
 
-
 	return contents
 }
 
@@ -81,8 +79,8 @@ type Jira struct {
 	Encoding     string
 	Debug        bool
 
-	Auth         *Auth
-	Client       *http.Client
+	Auth   *Auth
+	Client *http.Client
 }
 
 type Auth struct {
@@ -100,9 +98,9 @@ type Pagination struct {
 }
 
 type JiraProject struct {
-	Self       string `json:"-"`
-	Id         string `json:"-"`
-	Key        string `json:"key"`
-	Name       string `json:"-"`
+	Self       string            `json:"-"`
+	Id         string            `json:"-"`
+	Key        string            `json:"key"`
+	Name       string            `json:"-"`
 	AvatarUrls map[string]string `json:"-"`
 }

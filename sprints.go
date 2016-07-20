@@ -1,24 +1,24 @@
 package gojira
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
-	"encoding/json"
 )
 
 const (
-	sprintQuery_url = "/sprintquery"
+	sprintQuery_url  = "/sprintquery"
 	sprintReport_url = "/rapid/charts/sprintreport"
 )
 
 type Sprint struct {
-	Id        int           `json:"id"`
-	Name      string        `json:"name"`
-	StateKey  string        `json:"stateKey"`
-	BoardName string        `json:"boardName"`
-	State     string        `json:state`
-	StartDate string        `json:startDate`
-	EndDate   string        `json:endDate`
+	Id        int    `json:"id"`
+	Name      string `json:"name"`
+	StateKey  string `json:"stateKey"`
+	BoardName string `json:"boardName"`
+	State     string `json:state`
+	StartDate string `json:startDate`
+	EndDate   string `json:endDate`
 }
 
 type Sprints struct {
@@ -26,38 +26,36 @@ type Sprints struct {
 }
 
 type TextValue struct {
-	Value float32        `json:"value"`
-	Text  string        `json:"text"`
+	Value float32 `json:"value"`
+	Text  string  `json:"text"`
 }
 
 type SprintContents struct {
-	CompletedIssuesInitialEstimateSum    TextValue        `json:"completedIssuesInitialEstimateSum"`
-	CompletedIssuesEstimateSum           TextValue        `json:"completedIssuesEstimateSum"`
-	IssuesNotCompletedInitialEstimateSum TextValue        `json:"issuesNotCompletedInitialEstimateSum"`
-	issuesNotCompletedEstimateSum        TextValue        `json:"issuesNotCompletedEstimateSum"`
-	AllIssuesEstimateSum                 TextValue        `json:"allIssuesEstimateSum"`
+	CompletedIssuesInitialEstimateSum    TextValue `json:"completedIssuesInitialEstimateSum"`
+	CompletedIssuesEstimateSum           TextValue `json:"completedIssuesEstimateSum"`
+	IssuesNotCompletedInitialEstimateSum TextValue `json:"issuesNotCompletedInitialEstimateSum"`
+	issuesNotCompletedEstimateSum        TextValue `json:"issuesNotCompletedEstimateSum"`
+	AllIssuesEstimateSum                 TextValue `json:"allIssuesEstimateSum"`
 
-	ScopeChange                          map[string]bool `json:"issueKeysAddedDuringSprint"`
+	ScopeChange map[string]bool `json:"issueKeysAddedDuringSprint"`
 }
 
 type SprintReport struct {
 	//	CompletedIssues	  []SprintIssues    `json:"completedIssues"`
 	//	IncompletedIssues []SprintIssues	`json:"incompletedIssues"`
-	Contents SprintContents    `json:"contents"`
-	Sprint   Sprint            `json:"sprint"`
-
+	Contents SprintContents `json:"contents"`
+	Sprint   Sprint         `json:"sprint"`
 }
 
 type SprintIssues struct {
-	Id           int        `json:"id"`
-	Key          string    `json:"key"`
-	Hidden       bool    `json:"hidden"`
-	TypeName     string    `json:"typeName"`
-	Summary      string    `json:"sprint"`
-	Assignee     string    `json:"sprint"`
-	AssigneeName string    `json:"sprint"`
+	Id           int    `json:"id"`
+	Key          string `json:"key"`
+	Hidden       bool   `json:"hidden"`
+	TypeName     string `json:"typeName"`
+	Summary      string `json:"sprint"`
+	Assignee     string `json:"sprint"`
+	AssigneeName string `json:"sprint"`
 }
-
 
 /*
  List sprints
@@ -69,10 +67,10 @@ type SprintIssues struct {
 */
 func (j *Jira) ListSprints(rapidViewId int, history bool, future bool) (*Sprints, error) {
 
-	url := j.BaseUrl + j.GreenHopper + sprintQuery_url + "/"+ strconv.Itoa(rapidViewId) + "?"
+	url := j.BaseUrl + j.GreenHopper + sprintQuery_url + "/" + strconv.Itoa(rapidViewId) + "?"
 
-	url += "includeHistoricSprints="+strconv.FormatBool(history)
-	url += "&includeFutureSprints="+strconv.FormatBool(future)
+	url += "includeHistoricSprints=" + strconv.FormatBool(history)
+	url += "&includeFutureSprints=" + strconv.FormatBool(future)
 
 	if j.Debug {
 		fmt.Println(url)
@@ -98,13 +96,13 @@ func (j *Jira) ListSprints(rapidViewId int, history bool, future bool) (*Sprints
 
   rapidViewId		int
   sprintId			int
- */
+*/
 func (j *Jira) GetSprintReport(rapidViewId int, sprintId int) (*SprintReport, error) {
 
 	url := j.BaseUrl + j.GreenHopper + sprintReport_url + "?"
 
-	url += "rapidViewId="+strconv.Itoa(rapidViewId)
-	url += "&sprintId="+strconv.Itoa(sprintId)
+	url += "rapidViewId=" + strconv.Itoa(rapidViewId)
+	url += "&sprintId=" + strconv.Itoa(sprintId)
 
 	if j.Debug {
 		fmt.Println(url)

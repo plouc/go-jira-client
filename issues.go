@@ -1,45 +1,44 @@
 package gojira
 
 import (
-	"fmt"
-	"strings"
-	"net/url"
 	"encoding/json"
+	"fmt"
+	"net/url"
 	"strconv"
+	"strings"
 	"time"
 )
 
 const (
 	issue_worklog_url = "/worklog"
-	issue_url = "/issue"
-	search_url = "/search"
+	issue_url         = "/issue"
+	search_url        = "/search"
 )
 
-
 /*
-    CreateIssue creates a JIRA issue with given IssueFields.
-    Example:
+   CreateIssue creates a JIRA issue with given IssueFields.
+   Example:
 
-    jira := gojira.NewJira(... args ...)
+   jira := gojira.NewJira(... args ...)
 
-    // setting custom fields
-    custom := make(map[string]interface{})
-    custom["123451"] = 1
-    custom["123452"] = "test custom data"
+   // setting custom fields
+   custom := make(map[string]interface{})
+   custom["123451"] = 1
+   custom["123452"] = "test custom data"
 
-    fields := &gojira.IssueFields{
-      Project: &gojira.JiraProject{ Key: "TEST" },
-      Summary: "some new issue summary",
-      Description: "some new issue description",
-      IssueType: &gojira.IssueType{ Name: "bug" },
-      Custom: custom,
-    }
+   fields := &gojira.IssueFields{
+     Project: &gojira.JiraProject{ Key: "TEST" },
+     Summary: "some new issue summary",
+     Description: "some new issue description",
+     IssueType: &gojira.IssueType{ Name: "bug" },
+     Custom: custom,
+   }
 
-    if user, e := jira.User("someguy"); e == nil {
-      fields.Assignee = user.Assignee()
-    }
+   if user, e := jira.User("someguy"); e == nil {
+     fields.Assignee = user.Assignee()
+   }
 
-    rsp := jira.CreateIssue(fields)
+   rsp := jira.CreateIssue(fields)
 */
 func (j *Jira) CreateIssue(fields *IssueFields) (rsp IssueCreateResponse) {
 
@@ -148,16 +147,16 @@ func (j *Jira) IssuesAssignedTo(user string, maxResults int, startAt int) IssueL
 }
 
 /**
- Search issues using jira sql. Please see Jira documentation to know how to build queries
+Search issues using jira sql. Please see Jira documentation to know how to build queries
 
- jql            string  a JQL query string
- startAt        int     the index of the first issue to return (0-based)
- maxResults     int     the maximum number of issues to return (defaults to 50).
- validateQuery  bool    whether to validate the JQL query
- fields         string  the list of fields to return for each issue. By default, all navigable fields are returned.
- expand         string  A comma-separated list of the parameters to expand.
+jql            string  a JQL query string
+startAt        int     the index of the first issue to return (0-based)
+maxResults     int     the maximum number of issues to return (defaults to 50).
+validateQuery  bool    whether to validate the JQL query
+fields         string  the list of fields to return for each issue. By default, all navigable fields are returned.
+expand         string  A comma-separated list of the parameters to expand.
 
- return rsp     List of issues
+return rsp     List of issues
 */
 func (j *Jira) SearchIssues(jql string, startAt int, maxResults int, validateQuery bool, fields string, expand string) (rsp IssueList) {
 
@@ -220,9 +219,9 @@ func (j *Jira) SearchIssues(jql string, startAt int, maxResults int, validateQue
 // reduceBy - (required when "manual" is selected for adjustEstimate) the amount to reduce the remaining estimate by "2d"
 func (j *Jira) LogWork(issue, adjust, new, reduceBy string, worklog IssueWorklog) {
 
-	requestUrl := j.BaseUrl + j.ApiPath + issue_url + "/"+ issue + issue_worklog_url + "?adjustEstimate=auto";
+	requestUrl := j.BaseUrl + j.ApiPath + issue_url + "/" + issue + issue_worklog_url + "?adjustEstimate=auto"
 
-	fmt.Println(requestUrl);
+	fmt.Println(requestUrl)
 
 	requestBody, err := json.Marshal(worklog)
 	if err != nil {
@@ -270,7 +269,7 @@ func (j *Jira) IssuesByRawJQL(jql string) IssueList {
 }
 
 func (j *Jira) queryToIssueList(url string) IssueList {
-	contents := j.buildAndExecRequest("GET", url,nil)
+	contents := j.buildAndExecRequest("GET", url, nil)
 
 	var issues IssueList
 	err := json.Unmarshal(contents, &issues)
@@ -288,7 +287,6 @@ func (j *Jira) queryToIssueList(url string) IssueList {
 	return issues
 }
 
-
 type IssueCreateResponse struct {
 	Id   string `json:"id"`
 	Key  string `json:"key"`
@@ -296,43 +294,43 @@ type IssueCreateResponse struct {
 }
 
 type Issue struct {
-	Id        string            `json:"id"`
-	Key       string            `json:"key"`
-	Self      string            `json:"self"`
-	Expand    string            `json:"expand"`
-	Fields    *IssueFields      `json:"fields"`
+	Id        string       `json:"id"`
+	Key       string       `json:"key"`
+	Self      string       `json:"self"`
+	Expand    string       `json:"expand"`
+	Fields    *IssueFields `json:"fields"`
 	CreatedAt time.Time
-	ChangeLog *IssueChangeLog   `json:"changelog"`
+	ChangeLog *IssueChangeLog `json:"changelog"`
 }
 
 type IssueChangeLog struct {
-	StartAt   int            `json:"startAt"`
-	MaxResult int            `json:"maxResults"`
-	Total     int            `json:"total"`
+	StartAt   int                      `json:"startAt"`
+	MaxResult int                      `json:"maxResults"`
+	Total     int                      `json:"total"`
 	Histories []*IssueChangeLogHistory `json:"histories"`
 }
 
 type IssueChangeLogHistory struct {
-	Id      string                    `json:"id"`
-	Author  *IssueAuthor              `json:"author"`
-	Created CustomTime                `json:"created"`
-	Item    []map[string]interface{}  `json:"items"`
+	Id      string                   `json:"id"`
+	Author  *IssueAuthor             `json:"author"`
+	Created CustomTime               `json:"created"`
+	Item    []map[string]interface{} `json:"items"`
 }
 
 type IssueList struct {
-	Expand     string       `json:"expand"`
-	StartAt    int          `json:"startAt"`
-	MaxResults int          `json:"maxResults"`
-	Total      int          `json:"total"`
-	Issues     []*Issue     `json:"issues"`
-	Pagination *Pagination  `json:"id"`
+	Expand     string      `json:"expand"`
+	StartAt    int         `json:"startAt"`
+	MaxResults int         `json:"maxResults"`
+	Total      int         `json:"total"`
+	Issues     []*Issue    `json:"issues"`
+	Pagination *Pagination `json:"id"`
 }
 
 type IssueStatus struct {
-	Self        string      `json:"self"`
-	Description string      `json:"description"`
-	Icon        string      `json:"iconUrl"`
-	Name        string      `json:"name"`
+	Self        string `json:"self"`
+	Description string `json:"description"`
+	Icon        string `json:"iconUrl"`
+	Name        string `json:"name"`
 }
 
 type IssueUser struct {
@@ -340,52 +338,51 @@ type IssueUser struct {
 }
 
 type IssuePriority struct {
-	Id   string      `json:id`
-	Self string      `json:self`
+	Id   string `json:id`
+	Self string `json:self`
 	//    IconUrl string      `json:id`
-	Name string      `json:name`
+	Name string `json:name`
 }
 
 type WorkLogList struct {
-	StartAt     int	         `json:"startAt"`
-	MaxResults  int		 `json:"maxResults"`
-	Total	    int		 `json:"total"`
-	WorkLogs    []WorkLogs	 `json:"worklogs"`
-
+	StartAt    int        `json:"startAt"`
+	MaxResults int        `json:"maxResults"`
+	Total      int        `json:"total"`
+	WorkLogs   []WorkLogs `json:"worklogs"`
 }
 
 type WorkLogs struct {
-	Id               string     	`json:"id"`
-	Self		 string	    	`json:"self"`
-	Comment          string     	`json:"comment"`
-	TimeSpent        string     	`json:"timeSpent"`
-	TimeSpentSeconds int		`json:"timeSpentSeconds"`
-	Author           *IssueAuthor   `json:"author"`
+	Id               string       `json:"id"`
+	Self             string       `json:"self"`
+	Comment          string       `json:"comment"`
+	TimeSpent        string       `json:"timeSpent"`
+	TimeSpentSeconds int          `json:"timeSpentSeconds"`
+	Author           *IssueAuthor `json:"author"`
 	//AuthorName       string     `json:"authorFullName"`
 	//Created          int        `json:"created"`
-	StartDate        CustomTime     `json:"started"`
+	StartDate CustomTime `json:"started"`
 	//UpdateAuthor     string     `json:"updateAuthor"`
 	//UpdateAuthorName string     `json:"updateAuthorFullName"`
 	//Updated          int        `json:"updated"`
 }
 
 type IssueFields struct {
-	IssueType    *IssueType              `json:"issuetype"`
-	Parent       *Issue                  `json:"parent"`
-	Summary      string                  `json:"summary"`
-	Description  string                  `json:"description"`
-	Reporter     *IssueUser              `json:"reporter"`
-	Assignee     *IssueUser              `json:"assignee"`
-	Project      *JiraProject            `json:"project"`
-	Priority     *IssuePriority          `json:"priority"`
-	Created      CustomTime              `json:"created"`
-	TimeSpent    int                     `json:"timespent"`
-	TimeEstimate int                     `json:"aggregatetimeoriginalestimate"`
-	TimeTracking *IssueTimeTracking      `json:"timetracking"`
-	Status       *IssueStatus            `json:"status"`
-	SprintPoints float32                 `json:"customfield_10004"`
-	Labels       []string                `json:"labels"`
-	WorkLog      *WorkLogList	     `json:"worklog"`
+	IssueType    *IssueType         `json:"issuetype"`
+	Parent       *Issue             `json:"parent"`
+	Summary      string             `json:"summary"`
+	Description  string             `json:"description"`
+	Reporter     *IssueUser         `json:"reporter"`
+	Assignee     *IssueUser         `json:"assignee"`
+	Project      *JiraProject       `json:"project"`
+	Priority     *IssuePriority     `json:"priority"`
+	Created      CustomTime         `json:"created"`
+	TimeSpent    int                `json:"timespent"`
+	TimeEstimate int                `json:"aggregatetimeoriginalestimate"`
+	TimeTracking *IssueTimeTracking `json:"timetracking"`
+	Status       *IssueStatus       `json:"status"`
+	SprintPoints float32            `json:"customfield_10004"`
+	Labels       []string           `json:"labels"`
+	WorkLog      *WorkLogList       `json:"worklog"`
 	Custom       map[string]interface{}
 }
 
@@ -416,9 +413,9 @@ type IssueAuthor struct {
 }
 
 type IssueWorklog struct {
-	Self          string 		`json:"self"`
-	Comment       string    	`json:"comment"`
-	TimeSpent     string 		`json:"timeSpent"`
-	Author        IssueAuthor 	`json:"author"`
-	UpdatedAuthor IssueAuthor 	`json:"updateAuthor"`
+	Self          string      `json:"self"`
+	Comment       string      `json:"comment"`
+	TimeSpent     string      `json:"timeSpent"`
+	Author        IssueAuthor `json:"author"`
+	UpdatedAuthor IssueAuthor `json:"updateAuthor"`
 }

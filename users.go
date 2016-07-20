@@ -1,11 +1,11 @@
 package gojira
 
 import (
-	"fmt"
-	"time"
-	"net/url"
-	"encoding/xml"
 	"encoding/json"
+	"encoding/xml"
+	"fmt"
+	"net/url"
+	"time"
 )
 
 const (
@@ -31,28 +31,28 @@ type User struct {
 	AvatarUrls   map[string]string `json:"avatarUrls"`
 	Expand       string            `json:"expand"`
 	// "groups": {
-    //     "size": 3,
-    //     "items": [
-    //         {
-    //             "name": "jira-user",
-    //             "self": "http://www.example.com/jira/rest/api/2/group?groupname=jira-user"
-    //         },
-    //         {
-    //             "name": "jira-admin",
-    //             "self": "http://www.example.com/jira/rest/api/2/group?groupname=jira-admin"
-    //         },
-    //         {
-    //             "name": "important",
-    //             "self": "http://www.example.com/jira/rest/api/2/group?groupname=important"
-    //         }
-    //     ]
-    // }
+	//     "size": 3,
+	//     "items": [
+	//         {
+	//             "name": "jira-user",
+	//             "self": "http://www.example.com/jira/rest/api/2/group?groupname=jira-user"
+	//         },
+	//         {
+	//             "name": "jira-admin",
+	//             "self": "http://www.example.com/jira/rest/api/2/group?groupname=jira-admin"
+	//         },
+	//         {
+	//             "name": "important",
+	//             "self": "http://www.example.com/jira/rest/api/2/group?groupname=important"
+	//         }
+	//     ]
+	// }
 }
 
 // Assignee is a helper method for abstracting IssueFields.Assignee
 // when building data for CreateIssue
 func (u *User) Assignee() *IssueUser {
-    return &IssueUser{ Name: u.Name }
+	return &IssueUser{Name: u.Name}
 }
 
 /*
@@ -110,9 +110,8 @@ func (j *Jira) SearchUser(username string, startAt int, maxResults int, includeA
 	// @todo
 }
 
-
 func (j *Jira) UserActivity(user string) (ActivityFeed, error) {
-	url := j.BaseUrl + j.ActivityPath + "?streams=" + url.QueryEscape("user IS " + user)
+	url := j.BaseUrl + j.ActivityPath + "?streams=" + url.QueryEscape("user IS "+user)
 
 	return j.Activity(url)
 }
@@ -130,7 +129,6 @@ func (j *Jira) Activity(url string) (ActivityFeed, error) {
 	return activity, err
 }
 
-
 type ActivityItem struct {
 	Title    string    `xml:"title"json:"title"`
 	Id       string    `xml:"id"json:"id"`
@@ -142,15 +140,14 @@ type ActivityItem struct {
 }
 
 type ActivityFeed struct {
-	XMLName  xml.Name        `xml:"http://www.w3.org/2005/Atom feed"json:"xml_name"`
-	Title    string          `xml:"title"json:"title"`
-	Id       string          `xml:"id"json:"id"`
-	Link     []Link          `xml:"link"json:"link"`
-	Updated  time.Time       `xml:"updated,attr"json:"updated"`
-	Author   Person          `xml:"author"json:"author"`
-	Entries  []*ActivityItem `xml:"entry"json:"entries"`
+	XMLName xml.Name        `xml:"http://www.w3.org/2005/Atom feed"json:"xml_name"`
+	Title   string          `xml:"title"json:"title"`
+	Id      string          `xml:"id"json:"id"`
+	Link    []Link          `xml:"link"json:"link"`
+	Updated time.Time       `xml:"updated,attr"json:"updated"`
+	Author  Person          `xml:"author"json:"author"`
+	Entries []*ActivityItem `xml:"entry"json:"entries"`
 }
-
 
 type Category struct {
 	Term string `xml:"term,attr"json:"term"`
