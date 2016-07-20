@@ -128,20 +128,16 @@ func (j *Jira) IssuesAssignedTo(user string, maxResults int, startAt int) IssueL
 	if err != nil {
 		fmt.Println("%s", err)
 	}
-	//
-	//    for _, issue := range issues.Issues {
-	//        t, _ := time.Parse(dateLayout, issue.Fields.Created)
-	//        issue.CreatedAt = t
-	//    }
-	//
-	//    pagination := Pagination{
-	//        Total:      issues.Total,
-	//        StartAt:    issues.StartAt,
-	//        MaxResults: issues.MaxResults,
-	//    }
-	//    pagination.Compute()
-	//
-	//    issues.Pagination = &pagination
+
+	pagination := Pagination{
+		Total:      issues.Total,
+		StartAt:    issues.StartAt,
+		MaxResults: issues.MaxResults,
+	}
+
+	pagination.Compute()
+
+	issues.Pagination = &pagination
 
 	return issues
 }
@@ -189,7 +185,6 @@ func (j *Jira) SearchIssues(jql string, startAt int, maxResults int, validateQue
 	}
 
 	result := j.buildAndExecRequest("GET", requestUrl, nil)
-	//print(string(result[:]))
 	err := json.Unmarshal(result, &rsp)
 	if err != nil {
 		fmt.Println("ERR: %s", err)
