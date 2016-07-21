@@ -1,3 +1,4 @@
 .DS_Store
 examples/config.yml
+go-jira-client.iml
 .idea
