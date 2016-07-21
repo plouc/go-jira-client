@@ -36,13 +36,14 @@ func NewJira(baseUrl string, apiPath string, activityPath string, auth *Auth) *J
 		ActivityPath: activityPath,
 		Client:       client,
 		Auth:         auth,
-		Encoding:      "json",
+		Encoding:     "json",
 	}
 }
 
 func (j *Jira) buildAndExecRequest(method string, url string, data io.Reader) []byte {
 
-	req, err := http.NewRequest(method, url, data)
+	req, err := http.NewRequest(method, url, nil)
+
 	if err != nil {
 		panic("Error while building jira request")
 	}
@@ -79,7 +80,7 @@ type Jira struct {
 	GreenHopper  string
 	Encoding     string
 
-	Debug        bool
+	Debug bool
 
 	Auth   *Auth
 	Client *http.Client
