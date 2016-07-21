@@ -9,6 +9,7 @@ import (
 	"github.com/plouc/go-jira-client"
 	"io/ioutil"
 	"launchpad.net/goyaml"
+	"github.com/hekima/go-jira-client"
 )
 
 type Config struct {
