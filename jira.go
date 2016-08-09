@@ -5,11 +5,11 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io/ioutil"
+	"math"
 	"net/http"
 	"net/url"
 	"strconv"
 	"time"
-	"math"
 )
 
 type Jira struct {
@@ -83,7 +83,7 @@ type IssueType struct {
 }
 
 type IssueStatus struct {
-	Name        string
+	Name string
 }
 
 type JiraProject struct {
@@ -105,15 +105,15 @@ type ActivityItem struct {
 }
 
 type ActivityFeed struct {
-	XMLName  xml.Name        `xml:"http://www.w3.org/2005/Atom feed"json:"xml_name"`
-	Title    string          `xml:"title"json:"title"`
-	Id       string          `xml:"id"json:"id"`
-	Link     []Link          `xml:"link"json:"link"`
-	Updated  time.Time       `xml:"updated,attr"json:"updated"`
-	Author   Person          `xml:"author"json:"author"`
-	Entries  []*ActivityItem `xml:"entry"json:"entries"`
+	XMLName xml.Name        `xml:"http://www.w3.org/2005/Atom feed"json:"xml_name"`
+	Title   string          `xml:"title"json:"title"`
+	Id      string          `xml:"id"json:"id"`
+	Link    []Link          `xml:"link"json:"link"`
+	Updated time.Time       `xml:"updated,attr"json:"updated"`
+	Author  Person          `xml:"author"json:"author"`
+	Entries []*ActivityItem `xml:"entry"json:"entries"`
 }
-	
+
 type Category struct {
 	Term string `xml:"term,attr"json:"term"`
 }
@@ -153,7 +153,7 @@ const (
 )
 
 func (j *Jira) buildAndExecRequest(method string, url string) []byte {
-	
+
 	req, err := http.NewRequest(method, url, nil)
 	if err != nil {
 		panic("Error while building jira request")
@@ -171,7 +171,7 @@ func (j *Jira) buildAndExecRequest(method string, url string) []byte {
 }
 
 func (j *Jira) UserActivity(user string) (ActivityFeed, error) {
-	url := j.BaseUrl + j.ActivityPath + "?streams=" + url.QueryEscape("user IS " + user)
+	url := j.BaseUrl + j.ActivityPath + "?streams=" + url.QueryEscape("user IS "+user)
 
 	return j.Activity(url)
 }
